@@ -1,0 +1,53 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  release:
+      runs-on: ubuntu-latest-arm64
+      steps:
+        - use: actions/checkout@v4
+
+        - name: Install gcc
+          run: sudo apt-get install -y curl-devel libgcrypt-devel crypt* libev-devel
+
+        - name: Create percona-xtrabackup dir
+          run: sudo mkdir -p percona-xtrabackup  && sudo cd /home/apps/percona-xtrabackup
+
+        - name: Download percona-xtrabackup
+          run: sudo wget https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/source/tarball/percona-xtrabackup-2.4.29.tar.gz && sudo wget https://nchc.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz
+
+        - name: unpack percona-xtrabackup
+          run: sudo tar xzvf percona-xtrabackup-2.4.29.tar.gz && sudo cd percona-xtrabackup-2.4.29
+
+        - name: Create build dir
+          run: sudo mkdir -p build && sudo cd build
+
+        - name: Run cmake
+          run: sudo cmake .. TH_BOOST=/path/to/boost -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/apps/percona-xtrabackup/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release
+
+        - name: Build percona-xtrabackup
+          run: sudo make -j$(nproc)
+
+        - name: pack percona-xtrabackup
+          run: sudo cp -r /usr/local/xtrabackup percona-xtrabackup-2.4.29 &&  sudo tar czvf percona-xtrabackup-2.4.29.tar.gz percona-xtrabackup-2.4.29
+
+        - name:  Create Release
+          uses: softprops/action-gh-release@v1
+          with:
+            files: percona-xtrabackup-2.4.29.tar.gz
+            tag_name: v2.4.29
+            release_name: Percona XtraBackup 2.4.29
+            body: |
+              This is the release of Percona XtraBackup 2.4.29.
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+
+
+
