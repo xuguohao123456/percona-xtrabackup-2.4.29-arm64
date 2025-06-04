@@ -36,6 +36,7 @@ jobs:
             cd percona-xtrabackup-2.4.29
             mkdir -p build 
             cd build
+            ls -l /home/apps/percona-xtrabackup  
             cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/apps/percona-xtrabackup/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release
             make -j$(nproc)
             sudo make install
