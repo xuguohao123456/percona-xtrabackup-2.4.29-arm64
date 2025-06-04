@@ -22,7 +22,7 @@ jobs:
         - name: Create build dir use workspace
           run: |
             sudo mkdir -p /home/apps/percona-xtrabackup  
-            sudo cd /home/apps/percona-xtrabackup
+            cd /home/apps/percona-xtrabackup
 
         - name: Download percona-sources
           run: |
