@@ -31,14 +31,14 @@ jobs:
             cd percona-xtrabackup-2.4.29
             mkdir -p build 
             cd build
-            cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/runner/work/percona-xtrabackup-2.4.29-arm64/percona-xtrabackup-2.4.29-arm64/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release
-            make -j$(nproc)
-            sudo make install
+            cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/runner/work/percona-xtrabackup-2.4.29-arm64/percona-xtrabackup-2.4.29-arm64/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release >/dev/null 2>&1
+            make -j$(nproc) >/dev/null 2>&1
+            sudo make install >/dev/null 2>&1
 
         - name: pack percona-xtrabackup
           run: |
-            sudo cp -r /usr/local/xtrabackup percona-xtrabackup-2.4.29-arm64
-            sudo tar czvf percona-xtrabackup-2.4.29-arm64.tar.gz percona-xtrabackup-2.4.29-arm64
+            sudo cp -r /usr/local/xtrabackup percona-xtrabackup-2.4.29-arm64 >/dev/null 2>&1
+            sudo tar czf percona-xtrabackup-2.4.29-arm64.tar.gz percona-xtrabackup-2.4.29-arm64
 
         - name:  Create Release
           uses: softprops/action-gh-release@v1
