@@ -58,7 +58,6 @@ yum install -y curl-devel libgcrypt-devel crypt* libev-devel
 
     ```bash
     cmake .. \
-      -DWITH_BOOST=/path/to/boost \
       -DDOWNLOAD_BOOST=OFF \
       -DWITH_BOOST=/home/apps/percona-xtrabackup/boost_1_59_0.tar.gz \
       -DBUILD_CONFIG=xtrabackup_release
