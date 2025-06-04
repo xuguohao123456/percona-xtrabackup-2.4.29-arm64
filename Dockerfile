@@ -53,5 +53,6 @@ RUN groupadd -g 1001 mysql && \
     useradd -u 1001 -r -g mysql -s /sbin/nologin \
         -c "Default Application User" mysql
 
+
 VOLUME ["/backup"]
 CMD ["/usr/local/bin/xtrabackup"]
