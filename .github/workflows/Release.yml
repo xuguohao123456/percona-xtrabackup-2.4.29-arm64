@@ -17,7 +17,7 @@ jobs:
         - name: Install dependencies
           run: |
             sudo apt-get update
-            sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev libssl-dev cmake wget make g++
+            sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev  libaio-dev libssl-dev cmake wget make g++
 
         - name: Create build dir use workspace
           run: |
