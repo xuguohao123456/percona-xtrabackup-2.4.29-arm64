@@ -14,9 +14,9 @@ jobs:
       steps:
         - uses: actions/checkout@v2
 
-        - name: Get version from tag
-          id: get_version
-          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+#        - name: Get version from tag
+#          id: get_version
+#          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
         - name: Install dependencies
           run: |
@@ -52,8 +52,8 @@ jobs:
             prerelease: false
             generate_release_notes: false
             tag_name: v2.4.29
-            token: ${{ secrets.GITHUBTOKEN }}
-            name: "Version ${{ steps.get_version.outputs.VERSION }} 🚀"
+            token: ${{ secrets.GITHUB_TOKEN }}
+            name: "Version Percona XtraBackup v2.4.29 arm64 🚀"
             body: |
               This is the release of Percona XtraBackup v2.4.29 arm64
 
