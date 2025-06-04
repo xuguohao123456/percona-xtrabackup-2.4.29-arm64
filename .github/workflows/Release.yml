@@ -14,10 +14,10 @@ jobs:
       steps:
         - uses: actions/checkout@v2
 
-        - name: Install dependencies
-          run: |
-            sudo apt-get update  > /dev/null 2>&1
-            sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev  libaio-dev libssl-dev cmake wget make g++ > /dev/null 2>&1
+#        - name: Install dependencies
+#          run: |
+#            sudo apt-get update  > /dev/null 2>&1
+#            sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev  libaio-dev libssl-dev cmake wget make g++ > /dev/null 2>&1
 
         - name: Create build dir use workspace
           run: |
@@ -36,7 +36,8 @@ jobs:
             cd percona-xtrabackup-2.4.29
             mkdir -p build 
             cd build
-            ls -l /home/apps/percona-xtrabackup  
+            ls -l /home/apps/percona-xtrabackup
+            pwd
             cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/apps/percona-xtrabackup/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release
             make -j$(nproc)
             sudo make install
