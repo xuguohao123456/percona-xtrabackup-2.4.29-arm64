@@ -26,17 +26,16 @@ jobs:
 
         - name: Download sources
           run: |
-            sudo wget https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/source/tarball/percona-xtrabackup-2.4.29.tar.gz 
-            sudo wget https://nchc.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz
+            sudo wget -q  https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/source/tarball/percona-xtrabackup-2.4.29.tar.gz 
+            sudo wget -q https://nchc.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz
 
         - name: Build
           run: |
-            tar xzvf percona-xtrabackup-2.4.29.tar.gz 
-            tar xzvf boost_1_59_0.tar.gz 
+            tar xzf percona-xtrabackup-2.4.29.tar.gz 
             cd percona-xtrabackup-2.4.29
             mkdir -p build 
             cd build
-            cmake .. TH_BOOST=/path/to/boost -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/apps/percona-xtrabackup/boost_1_59_0 -DBUILD_CONFIG=xtrabackup_release
+            cmake .. -DWITH_BOOST=/path/to/boost -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/apps/percona-xtrabackup/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release
             make -j$(nproc)
             sudo make install
 
