@@ -9,54 +9,138 @@ on:
       - main
 
 jobs:
+  build-arm64:
+    name: Build ARM64 (ubuntu-22.04-arm)
+    runs-on: ubuntu-22.04-arm
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
+      md5: ${{ steps.md5.outputs.md5 }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update  > /dev/null 2>&1
+          sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev  libaio-dev libssl-dev cmake wget make g++ > /dev/null 2>&1
+
+      - name: Download sources
+        run: |
+          sudo wget -q  https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/source/tarball/percona-xtrabackup-2.4.29.tar.gz 
+          sudo wget -q https://nchc.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz
+
+      - name: Build
+        run: |
+          tar xzf percona-xtrabackup-2.4.29.tar.gz 
+          tar xzf boost_1_59_0.tar.gz
+          cd percona-xtrabackup-2.4.29
+          mkdir -p build 
+          cd build
+          cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=${{ github.workspace }}/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release >/dev/null 2>&1
+          make -j$(nproc) >/dev/null 2>&1
+          sudo make install >/dev/null 2>&1
+
+      - name: Pack percona-xtrabackup (arm64)
+        id: pack
+        run: |
+          sudo cp -r /usr/local/xtrabackup percona-xtrabackup-2.4.29-arm64 >/dev/null 2>&1
+          sudo tar czf percona-xtrabackup-2.4.29-arm64.tar.gz percona-xtrabackup-2.4.29-arm64
+          echo "tarball=percona-xtrabackup-2.4.29-arm64.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Generate MD5 sum (arm64)
+        id: md5
+        run: |
+          md5sum percona-xtrabackup-2.4.29-arm64.tar.gz | tee percona-xtrabackup-2.4.29-arm64.tar.gz.md5
+          echo "md5=percona-xtrabackup-2.4.29-arm64.tar.gz.md5" >> $GITHUB_OUTPUT
+
+      - name: Upload arm64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: percona-xtrabackup-2.4.29-arm64
+          path: |
+            percona-xtrabackup-2.4.29-arm64.tar.gz
+            percona-xtrabackup-2.4.29-arm64.tar.gz.md5
+
+  build-amd64:
+    name: Build AMD64 (ubuntu-24.04)
+    runs-on: ubuntu-24.04
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
+      md5: ${{ steps.md5.outputs.md5 }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update  > /dev/null 2>&1
+          sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev  libaio-dev libssl-dev cmake wget make g++ > /dev/null 2>&1
+
+      - name: Download sources
+        run: |
+          sudo wget -q  https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/source/tarball/percona-xtrabackup-2.4.29.tar.gz 
+          sudo wget -q https://nchc.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz
+
+      - name: Build
+        run: |
+          tar xzf percona-xtrabackup-2.4.29.tar.gz 
+          tar xzf boost_1_59_0.tar.gz
+          cd percona-xtrabackup-2.4.29
+          mkdir -p build 
+          cd build
+          cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=${{ github.workspace }}/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release >/dev/null 2>&1
+          make -j$(nproc) >/dev/null 2>&1
+          sudo make install >/dev/null 2>&1
+
+      - name: Pack percona-xtrabackup (amd64)
+        id: pack
+        run: |
+          sudo cp -r /usr/local/xtrabackup percona-xtrabackup-2.4.29-amd64 >/dev/null 2>&1
+          sudo tar czf percona-xtrabackup-2.4.29-amd64.tar.gz percona-xtrabackup-2.4.29-amd64
+          echo "tarball=percona-xtrabackup-2.4.29-amd64.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Generate MD5 sum (amd64)
+        id: md5
+        run: |
+          md5sum percona-xtrabackup-2.4.29-amd64.tar.gz | tee percona-xtrabackup-2.4.29-amd64.tar.gz.md5
+          echo "md5=percona-xtrabackup-2.4.29-amd64.tar.gz.md5" >> $GITHUB_OUTPUT
+
+      - name: Upload amd64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: percona-xtrabackup-2.4.29-amd64
+          path: |
+            percona-xtrabackup-2.4.29-amd64.tar.gz
+            percona-xtrabackup-2.4.29-amd64.tar.gz.md5
+
   release:
-      runs-on: ubuntu-22.04-arm
-      steps:
-        - uses: actions/checkout@v2
+    name: Create Combined Release
+    runs-on: ubuntu-latest
+    needs: [build-arm64, build-amd64]
+    steps:
+      - name: Download arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: percona-xtrabackup-2.4.29-arm64
 
-#        - name: Get version from tag
-#          id: get_version
-#          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Download amd64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: percona-xtrabackup-2.4.29-amd64
 
-        - name: Install dependencies
-          run: |
-            sudo apt-get update  > /dev/null 2>&1
-            sudo apt-get install -y libcurl4-openssl-dev libgcrypt20-dev libev-dev  libaio-dev libssl-dev cmake wget make g++ > /dev/null 2>&1
-
-        - name: Download sources
-          run: |
-            sudo wget -q  https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/source/tarball/percona-xtrabackup-2.4.29.tar.gz 
-            sudo wget -q https://nchc.dl.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz
-
-        - name: Build
-          run: |
-            tar xzf percona-xtrabackup-2.4.29.tar.gz 
-            tar xzf boost_1_59_0.tar.gz
-            cd percona-xtrabackup-2.4.29
-            mkdir -p build 
-            cd build
-            cmake ..  -DDOWNLOAD_BOOST=OFF -DWITH_BOOST=/home/runner/work/percona-xtrabackup-2.4.29-arm64/percona-xtrabackup-2.4.29-arm64/boost_1_59_0.tar.gz -DBUILD_CONFIG=xtrabackup_release >/dev/null 2>&1
-            make -j$(nproc) >/dev/null 2>&1
-            sudo make install >/dev/null 2>&1
-
-        - name: pack percona-xtrabackup
-          run: |
-            sudo cp -r /usr/local/xtrabackup percona-xtrabackup-2.4.29-arm64 >/dev/null 2>&1
-            sudo tar czf percona-xtrabackup-2.4.29-arm64.tar.gz percona-xtrabackup-2.4.29-arm64
-
-        - name:  Create Release
-          uses: softprops/action-gh-release@v1
-          with:
-            files: percona-xtrabackup-2.4.29-arm64.tar.gz
-            draft: false
-            prerelease: false
-            generate_release_notes: false
-            tag_name: v2.4.29
-            token: ${{ secrets.GITHUB_TOKEN }}
-            name: "Version Percona XtraBackup v2.4.29 arm64 🚀"
-            body: |
-              This is the release of Percona XtraBackup v2.4.29 arm64
-
-
-
-
+      - name: Create combined release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            percona-xtrabackup-2.4.29-arm64.tar.gz
+            percona-xtrabackup-2.4.29-arm64.tar.gz.md5
+            percona-xtrabackup-2.4.29-amd64.tar.gz
+            percona-xtrabackup-2.4.29-amd64.tar.gz.md5
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          tag_name: v2.4.29
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "Version Percona XtraBackup v2.4.29 🚀"
+          body: |
+            This release contains:
+            - percona-xtrabackup-2.4.29-arm64.tar.gz (ubuntu-22.04-arm) and its MD5
+            - percona-xtrabackup-2.4.29-amd64.tar.gz (ubuntu-24.04) and its MD5
